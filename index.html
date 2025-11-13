@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auditoría de Gestión BSC - Pinturas Cóndor S.A.</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #2d3748;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #718096;
+            font-size: 1.1em;
+        }
+
+        .filters {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            margin-bottom: 30px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-group label {
+            display: block;
+            color: #4a5568;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .filter-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-group select:hover {
+            border-color: #667eea;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+        }
+
+        .metric-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .metric-title {
+            font-size: 0.9em;
+            color: #718096;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .risk-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .risk-alto {
+            background: #feb2b2;
+            color: #c53030;
+        }
+
+        .risk-moderado {
+            background: #fbd38d;
+            color: #c05621;
+        }
+
+        .risk-bajo {
+            background: #9ae6b4;
+            color: #22543d;
+        }
+
+        .metric-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #2d3748;
+            margin: 10px 0;
+        }
+
+        .metric-goal {
+            font-size: 0.9em;
+            color: #718096;
+            margin-bottom: 15px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.5s ease;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .chart-title {
+            font-size: 1.3em;
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .actions-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .actions-title {
+            font-size: 1.5em;
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .action-item {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s;
+        }
+
+        .action-item:hover {
+            background: #edf2f7;
+            transform: translateX(5px);
+        }
+
+        .action-item h4 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .action-item p {
+            color: #718096;
+            line-height: 1.6;
+        }
+
+        .action-meta {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .meta-tag {
+            display: inline-block;
+            padding: 5px 10px;
+            background: #e2e8f0;
+            border-radius: 5px;
+            font-size: 0.85em;
+            color: #4a5568;
+        }
+
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+        }
+
+        .tab-container {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            margin-bottom: 30px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 1em;
+            font-weight: 600;
+            color: #718096;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            color: #667eea;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 Auditoría de Gestión BSC</h1>
+            <p><strong>Pinturas Cóndor S.A.</strong> | Análisis de Indicadores Estratégicos | 2025</p>
+        </div>
+
+        <div class="filters">
+            <div class="filter-group">
+                <label>Perspectiva BSC</label>
+                <select id="perspectiveFilter" onchange="filterDashboard()">
+                    <option value="todas">Todas las perspectivas</option>
+                    <option value="financiera">Financiera</option>
+                    <option value="procesos">Procesos Internos</option>
+                    <option value="aprendizaje">Aprendizaje y Crecimiento</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Nivel de Riesgo</label>
+                <select id="riskFilter" onchange="filterDashboard()">
+                    <option value="todos">Todos los riesgos</option>
+                    <option value="alto">Alto</option>
+                    <option value="moderado">Moderado</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="metrics-grid" id="metricsGrid">
+            <div class="metric-card" data-perspective="aprendizaje" data-risk="alto">
+                <div class="metric-header">
+                    <span class="metric-title">Capacitación</span>
+                    <span class="risk-badge risk-alto">Alto</span>
+                </div>
+                <div class="metric-value">0.1</div>
+                <div class="metric-goal">Meta: ≥ 70% capacitados | Actual: ~14%</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 14%"></div>
+                </div>
+            </div>
+
+            <div class="metric-card" data-perspective="financiera" data-risk="alto">
+                <div class="metric-header">
+                    <span class="metric-title">Desviación Presupuestaria (BI)</span>
+                    <span class="risk-badge risk-alto">Alto</span>
+                </div>
+                <div class="metric-value">$10.8B</div>
+                <div class="metric-goal">Meta: Desviación ≤ 10%</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 5%; background: #fc8181"></div>
+                </div>
+            </div>
+
+            <div class="metric-card" data-perspective="financiera" data-risk="moderado">
+                <div class="metric-header">
+                    <span class="metric-title">ROE - Rentabilidad</span>
+                    <span class="risk-badge risk-moderado">Moderado</span>
+                </div>
+                <div class="metric-value">7.89%</div>
+                <div class="metric-goal">Meta: ≥ 15% | Actual: 7.89%</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 52.6%; background: #f6ad55"></div>
+                </div>
+            </div>
+
+            <div class="metric-card" data-perspective="financiera" data-risk="moderado">
+                <div class="metric-header">
+                    <span class="metric-title">Prueba Ácida - Liquidez</span>
+                    <span class="risk-badge risk-moderado">Moderado</span>
+                </div>
+                <div class="metric-value">0.94</div>
+                <div class="metric-goal">Meta: ≥ 1.20 | Actual: 0.94</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 78.3%; background: #f6ad55"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-container">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('resumen')">Resumen Ejecutivo</button>
+                <button class="tab" onclick="switchTab('analisis')">Análisis Detallado</button>
+                <button class="tab" onclick="switchTab('cronograma')">Cronograma</button>
+            </div>
+
+            <div id="resumen" class="tab-content active">
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3 class="chart-title">Comparativa de Indicadores vs Meta</h3>
+                        <canvas id="chartComparativa"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3 class="chart-title">Distribución de Riesgos</h3>
+                        <canvas id="chartRiesgos"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card" style="margin-bottom: 30px;">
+                    <h3 class="chart-title">Cumplimiento por Perspectiva BSC</h3>
+                    <canvas id="chartPerspectivas"></canvas>
+                </div>
+            </div>
+
+            <div id="analisis" class="tab-content">
+                <div class="chart-card" style="margin-bottom: 30px;">
+                    <h3 class="chart-title">Análisis de Brecha (Gap Analysis)</h3>
+                    <canvas id="chartBrechas"></canvas>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3 class="chart-title">Impacto vs Probabilidad</h3>
+                        <canvas id="chartMatrizRiesgo"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3 class="chart-title">Recursos Asignados</h3>
+                        <canvas id="chartRecursos"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div id="cronograma" class="tab-content">
+                <div class="chart-card">
+                    <h3 class="chart-title">Línea de Tiempo - Plan de Mitigación</h3>
+                    <canvas id="chartCronograma"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions-section">
+            <h2 class="actions-title">📋 Plan de Mitigación - Acciones Prioritarias</h2>
+            
+            <div class="action-item">
+                <h4>1. Programa Obligatorio de Capacitación en Ética y Código de Conducta</h4>
+                <p><strong>Solución:</strong> Implementar un programa obligatorio de capacitación anual en Ética y Código de Conducta para todo el personal, con módulos específicos por área y evaluaciones de cumplimiento.</p>
+                <div class="action-meta">
+                    <span class="meta-tag">👥 Responsable: Jefe de Talento Humano</span>
+                    <span class="meta-tag">📅 Plazo: 01/12/2025 - 30/06/2025</span>
+                    <span class="meta-tag">💰 Presupuesto: $207</span>
+                    <span class="meta-tag">🎯 Meta: ≥70% empleados capacitados</span>
+                    <span class="meta-tag">⚠️ Indicador Ética: Actual 0.1</span>
+                </div>
+            </div>
+
+            <div class="action-item">
+                <h4>2. Iniciativa de Gobernanza de Datos y Business Intelligence</h4>
+                <p><strong>Solución:</strong> Iniciar una Iniciativa de Gobernanza de Datos para corregir la extrema variabilidad y baja fiabilidad de los datos presupuestarios. Incluye implementación de software BI, políticas de calidad de datos, y controles automáticos de validación.</p>
+                <div class="action-meta">
+                    <span class="meta-tag">👥 Responsable: Gerente Financiero - CIO</span>
+                    <span class="meta-tag">📅 Plazo: 01/12/2025 - 31/08/2025</span>
+                    <span class="meta-tag">💻 Software BI + Gobernanza: $207</span>
+                    <span class="meta-tag">🎯 Meta: Desviación ≤10%</span>
+                    <span class="meta-tag">⚠️ Desviación actual: $10.8B</span>
+                </div>
+            </div>
+
+            <div class="action-item">
+                <h4>3. Proyecto Estratégico de Optimización Operacional</h4>
+                <p><strong>Solución:</strong> Implementar un Proyecto Estratégico de Optimización Operacional enfocado en mejora de procesos productivos, reducción de costos operativos, y maximización de márgenes para incrementar la rentabilidad del patrimonio.</p>
+                <div class="action-meta">
+                    <span class="meta-tag">👥 Responsable: Gerente General - Gerente de Operaciones</span>
+                    <span class="meta-tag">📅 Plazo: 01/12/2025 - 31/08/2025</span>
+                    <span class="meta-tag">🔍 Consultoría Lean Six Sigma: $207</span>
+                    <span class="meta-tag">🎯 Meta: ROE ≥15%</span>
+                    <span class="meta-tag">⚠️ ROE actual: 7.89%</span>
+                </div>
+            </div>
+
+            <div class="action-item">
+                <h4>4. Plan de Optimización Urgente de Capital de Trabajo y Cobranza</h4>
+                <p><strong>Solución:</strong> Ejecutar urgentemente un plan de optimización de capital de trabajo mediante: (1) aceleración de cobros con políticas agresivas de recuperación, (2) renegociación de plazos con proveedores, (3) software de gestión de cobranzas, y (4) proyecciones semanales de flujo de caja.</p>
+                <div class="action-meta">
+                    <span class="meta-tag">👥 Responsable: Tesorero - Gerente Financiero</span>
+                    <span class="meta-tag">📅 Plazo: URGENTE 01/12/2025 - 31/08/2025</span>
+                    <span class="meta-tag">💻 Software cobranzas + Capital de Trabajo: $207</span>
+                    <span class="meta-tag">🎯 Meta: Prueba Ácida ≥1.20</span>
+                    <span class="meta-tag">⚠️ Liquidez actual: 0.94</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuración de colores
+        const colors = {
+            primary: '#667eea',
+            secondary: '#764ba2',
+            success: '#48bb78',
+            warning: '#f6ad55',
+            danger: '#fc8181',
+            info: '#4299e1'
+        };
+
+        // Datos de indicadores
+        const indicadores = {
+            capacitacion: { actual: 0.1, meta: 0.7, label: 'Capacitación' },
+            roe: { actual: 0.0789, meta: 0.15, label: 'ROE' },
+            liquidez: { actual: 0.94, meta: 1.20, label: 'Prueba Ácida' }
+        };
+
+        // Gráfico Comparativa
+        const ctxComparativa = document.getElementById('chartComparativa').getContext('2d');
+        new Chart(ctxComparativa, {
+            type: 'bar',
+            data: {
+                labels: ['Capacitación', 'ROE', 'Prueba Ácida'],
+                datasets: [{
+                    label: 'Valor Actual',
+                    data: [14, 7.89, 0.94],
+                    backgroundColor: colors.danger
+                }, {
+                    label: 'Meta',
+                    data: [70, 15, 1.20],
+                    backgroundColor: colors.success
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    title: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // Gráfico Riesgos
+        const ctxRiesgos = document.getElementById('chartRiesgos').getContext('2d');
+        new Chart(ctxRiesgos, {
+            type: 'doughnut',
+            data: {
+                labels: ['Riesgo Alto', 'Riesgo Moderado'],
+                datasets: [{
+                    data: [2, 2],
+                    backgroundColor: [colors.danger, colors.warning]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+
+        // Gráfico Perspectivas BSC
+        const ctxPerspectivas = document.getElementById('chartPerspectivas').getContext('2d');
+        new Chart(ctxPerspectivas, {
+            type: 'radar',
+            data: {
+                labels: ['Financiera', 'Clientes', 'Procesos Internos', 'Aprendizaje y Crecimiento'],
+                datasets: [{
+                    label: 'Cumplimiento Actual',
+                    data: [52, 75, 65, 14],
+                    backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                    borderColor: colors.primary,
+                    pointBackgroundColor: colors.primary
+                }, {
+                    label: 'Meta',
+                    data: [100, 100, 100, 100],
+                    backgroundColor: 'rgba(72, 187, 120, 0.1)',
+                    borderColor: colors.success,
+                    pointBackgroundColor: colors.success
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                },
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+
+        // Gráfico Brechas
+        const ctxBrechas = document.getElementById('chartBrechas').getContext('2d');
+        new Chart(ctxBrechas, {
+            type: 'bar',
+            data: {
+                labels: ['Capacitación', 'Desv. Presup.', 'ROE', 'Liquidez'],
+                datasets: [{
+                    label: 'Brecha (%)',
+                    data: [-80, -90, -47.4, -21.7],
+                    backgroundColor: [colors.danger, colors.danger, colors.warning, colors.warning]
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: { 
+                        beginAtZero: true,
+                        max: 0,
+                        min: -100
+                    }
+                }
+            }
+        });
+
+        // Gráfico Matriz de Riesgo
+        const ctxMatriz = document.getElementById('chartMatrizRiesgo').getContext('2d');
+        new Chart(ctxMatriz, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: 'Capacitación',
+                    data: [{ x: 3, y: 2 }],
+                    backgroundColor: colors.danger,
+                    pointRadius: 15
+                }, {
+                    label: 'Desv. Presup.',
+                    data: [{ x: 3, y: 3 }],
+                    backgroundColor: colors.danger,
+                    pointRadius: 15
+                }, {
+                    label: 'ROE',
+                    data: [{ x: 3, y: 1 }],
+                    backgroundColor: colors.warning,
+                    pointRadius: 15
+                }, {
+                    label: 'Liquidez',
+                    data: [{ x: 2, y: 1 }],
+                    backgroundColor: colors.warning,
+                    pointRadius: 15
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    title: {
+                        display: true,
+                        text: 'Probabilidad (X) vs Impacto (Y)'
+                    }
+                },
+                scales: {
+                    x: { 
+                        min: 0,
+                        max: 4,
+                        title: { display: true, text: 'Probabilidad' }
+                    },
+                    y: { 
+                        min: 0,
+                        max: 4,
+                        title: { display: true, text: 'Impacto' }
+                    }
+                }
+            }
+        });
+
+        // Gráfico Recursos
+        const ctxRecursos = document.getElementById('chartRecursos').getContext('2d');
+        new Chart(ctxRecursos, {
+            type: 'pie',
+            data: {
+                labels: ['Presup. Capacitación', 'Software BI', 'Consultoría', 'Software Cobranzas'],
+                datasets: [{
+                    data: [207, 207, 207, 207],
+                    backgroundColor: [colors.primary, colors.info, colors.warning, colors.success]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+
+        // Gráfico Cronograma
+        const ctxCronograma = document.getElementById('chartCronograma').getContext('2d');
+        new Chart(ctxCronograma, {
+            type: 'bar',
+            data: {
+                labels: ['Capacitación', 'Business Intelligence', 'Optimización Costos', 'Gestión Cartera'],
+                datasets: [{
+                    label: 'Duración (meses)',
+                    data: [7, 9, 9, 9],
+                    backgroundColor: [colors.primary, colors.info, colors.warning, colors.success]
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    title: {
+                        display: true,
+                        text: 'Inicio: 01/12/2025'
+                    }
+                },
+                scales: {
+                    x: {
+                        title: { display: true, text: 'Duración en meses' }
+                    }
+                }
+            }
+        });
+
+        // Funciones de filtrado
+        function filterDashboard() {
+            const perspective = document.getElementById('perspectiveFilter').value;
+            const risk = document.getElementById('riskFilter').value;
+            const cards = document.querySelectorAll('.metric-card');
+
+            cards.forEach(card => {
+                const cardPerspective = card.getAttribute('data-perspective');
+                const cardRisk = card.getAttribute('data-risk');
+                
+                let showPerspective = perspective === 'todas' || cardPerspective === perspective;
+                let showRisk = risk === 'todos' || cardRisk === risk;
+
+                if (showPerspective && showRisk) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Función para cambiar tabs
+        function switchTab(tabName) {
+            // Ocultar todos los contenidos
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+
+            // Desactivar todos los tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            // Activar el tab seleccionado
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Animación de entrada
+        window.addEventListener('load', () => {
+            const cards = document.querySelectorAll('.metric-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                    card.style.transition = 'all 0.5s ease';
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, 50);
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>
